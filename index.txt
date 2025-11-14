@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أداة إزالة خلفية الصور المتطورة</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .app-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+        
+        .upload-section, .preview-section {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .upload-area {
+            border: 3px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .upload-area:hover {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .upload-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 140px;
+        }
+        
+        .btn-primary {
+            background: #4a90e2;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #3a7bc8;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-success {
+            background: #2ecc71;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #27ae60;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #c0392b;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .image-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 5px solid #fff;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .slider-container {
+            margin: 20px 0;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #4a90e2;
+            cursor: pointer;
+        }
+        
+        .info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* أنماط جديدة للصور المتعددة */
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .image-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(231, 76, 60, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .image-item.active {
+            box-shadow: 0 0 0 3px #4a90e2;
+        }
+        
+        .batch-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .batch-progress {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .batch-progress-bar {
+            height: 100%;
+            background: #2ecc71;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .batch-status {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .color-picker-container {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .color-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            margin: 10px auto;
+            border: 2px solid white;
+        }
+        
+        .color-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-option.active {
+            border-color: white;
+            transform: scale(1.1);
+        }
+        
+        .removal-modes {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mode-btn.active {
+            background: #4a90e2;
+            border-color: #4a90e2;
+        }
+        
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .color-tolerance {
+            margin-top: 15px;
+        }
+        
+        /* أنماط جديدة للمعاينة */
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .preview-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .preview-item .download-btn {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: rgba(46, 204, 113, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        /* نافذة الصورة المنبثقة */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-image {
+            max-width: 100%;
+            max-height: 80vh;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(231, 76, 60, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            z-index: 1001;
+        }
+        
+        .modal-download {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(46, 204, 113, 0.8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 1001;
+        }
+        
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .images-grid, .preview-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+            
+            .modal-content {
+                max-width: 95%;
+                max-height: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>أداة إزالة خلفية الصور المتطورة</h1>
+            <p class="subtitle">أداة متطورة لإزالة الخلفية أو الألوان المحددة من الصور باستخدام JavaScript فقط</p>
+        </header>
+        
+        <div class="app-container">
+            <div class="upload-section">
+                <h2 class="section-title">تحميل الصور</h2>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <p>انقر لتحميل الصور أو اسحبها إلى هنا (حتى 50 صورة)</p>
+                    <input type="file" id="fileInput" class="file-input" accept="image/*" multiple>
+                </div>
+                
+                <div class="images-grid" id="imagesGrid"></div>
+                
+                <div class="removal-modes">
+                    <button class="mode-btn active" data-mode="background">إزالة الخلفية</button>
+                    <button class="mode-btn" data-mode="color">إزالة لون محدد</button>
+                </div>
+                
+                <div class="color-picker-container" id="colorPickerContainer" style="display: none;">
+                    <h3>اختر اللون المراد إزالته:</h3>
+                    <div class="color-preview" id="colorPreview"></div>
+                    <p>انقر على الصورة لاختيار لون أو اختر من الألوان الشائعة:</p>
+                    <div class="color-options">
+                        <div class="color-option" style="background-color: #ffffff;" data-color="#ffffff"></div>
+                        <div class="color-option" style="background-color: #000000;" data-color="#000000"></div>
+                        <div class="color-option" style="background-color: #00ff00;" data-color="#00ff00"></div>
+                        <div class="color-option" style="background-color: #0000ff;" data-color="#0000ff"></div>
+                        <div class="color-option" style="background-color: #ff0000;" data-color="#ff0000"></div>
+                        <div class="color-option" style="background-color: #ffff00;" data-color="#ffff00"></div>
+                    </div>
+                    <div class="color-tolerance">
+                        <div class="slider-label">
+                            <span>مدى تحمل الاختلاف في اللون:</span>
+                            <span id="toleranceValue">20%</span>
+                        </div>
+                        <input type="range" min="1" max="100" value="20" class="slider" id="toleranceSlider">
+                    </div>
+                </div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>حساسية إزالة الخلفية:</span>
+                        <span id="sensitivityValue">50%</span>
+                    </div>
+                    <input type="range" min="1" max="100" value="50" class="slider" id="sensitivitySlider">
+                </div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>دقة المعالجة:</span>
+                        <span id="qualityValue">عالية (300%)</span>
+                    </div>
+                    <input type="range" min="1" max="3" value="3" class="slider" id="qualitySlider">
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" id="removeBgBtn" disabled>إزالة الخلفية</button>
+                    <button class="btn btn-success" id="downloadAllBtn" disabled>تحميل الكل</button>
+                    <button class="btn btn-secondary" id="resetBtn">إعادة تعيين</button>
+                </div>
+                
+                <div class="batch-controls">
+                    <button class="btn btn-primary" id="removeAllBgBtn" disabled>إزالة خلفية الكل</button>
+                </div>
+                
+                <div class="batch-progress">
+                    <div class="batch-progress-bar" id="batchProgressBar"></div>
+                </div>
+                <div class="batch-status" id="batchStatus"></div>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>جاري معالجة الصورة...</p>
+                </div>
+                
+                <div class="info">
+                    <h3>معلومات عن الأداة:</h3>
+                    <p>هذه الأداة تستخدم خوارزميات متقدمة في JavaScript لإزالة الخلفية أو الألوان المحددة من الصور.</p>
+                    <p><strong>وضع إزالة الخلفية:</strong> يزيل الخلفية الفاتحة تلقائياً.</p>
+                    <p><strong>وضع إزالة اللون المحدد:</strong> يزيل لوناً محدداً تختاره من الصورة.</p>
+                </div>
+            </div>
+            
+            <div class="preview-section">
+                <h2 class="section-title">معاينة النتائج</h2>
+                
+                <div class="preview-grid" id="previewGrid">
+                    <p id="previewPlaceholder" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        ستظهر الصور المعالجة هنا
+                    </p>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-success" id="downloadSelectedBtn" disabled>تحميل المحدد</button>
+                </div>
+                
+                <div class="info">
+                    <h3>كيفية الاستخدام:</h3>
+                    <ol>
+                        <li>قم بتحميل صورة أو عدة صور من جهازك (حتى 50 صورة)</li>
+                        <li>اختر وضع الإزالة: خلفية تلقائية أو لون محدد</li>
+                        <li>إذا اخترت لون محدد، انقر على الصورة لاختيار اللون أو اختر من الألوان الشائعة</li>
+                        <li>اضبط إعدادات الحساسية والدقة حسب الحاجة</li>
+                        <li>انقر على زر "إزالة الخلفية" للصورة المحددة أو "إزالة خلفية الكل" للمعالجة الجماعية</li>
+                        <li>انقر على أي صورة في قسم المعاينة لعرضها بحجم كبير</li>
+                        <li>قم بتحميل الصورة/الصور الناتجة بعد الإزالة</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        
+        <!-- نافذة الصورة المنبثقة -->
+        <div class="image-modal" id="imageModal">
+            <div class="modal-content">
+                <button class="close-modal" id="closeModal">×</button>
+                <img class="modal-image" id="modalImage" src="" alt="صورة مكبرة">
+                <button class="modal-download" id="modalDownload">تحميل الصورة</button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>تم تطوير هذه الأداة باستخدام JavaScript فقط - &copy; 2023</p>
+        </footer>
+    </div>
+
+    <script>
+        // عناصر DOM
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const removeBgBtn = document.getElementById('removeBgBtn');
+        const downloadAllBtn = document.getElementById('downloadAllBtn');
+        const downloadSelectedBtn = document.getElementById('downloadSelectedBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const removeAllBgBtn = document.getElementById('removeAllBgBtn');
+        const sensitivitySlider = document.getElementById('sensitivitySlider');
+        const sensitivityValue = document.getElementById('sensitivityValue');
+        const qualitySlider = document.getElementById('qualitySlider');
+        const qualityValue = document.getElementById('qualityValue');
+        const toleranceSlider = document.getElementById('toleranceSlider');
+        const toleranceValue = document.getElementById('toleranceValue');
+        const loading = document.getElementById('loading');
+        const previewPlaceholder = document.getElementById('previewPlaceholder');
+        const imagesGrid = document.getElementById('imagesGrid');
+        const previewGrid = document.getElementById('previewGrid');
+        const batchProgressBar = document.getElementById('batchProgressBar');
+        const batchStatus = document.getElementById('batchStatus');
+        const colorPickerContainer = document.getElementById('colorPickerContainer');
+        const colorPreview = document.getElementById('colorPreview');
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        const colorOptions = document.querySelectorAll('.color-option');
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const closeModal = document.getElementById('closeModal');
+        const modalDownload = document.getElementById('modalDownload');
+        
+        // سياق الرسوم للكانفاس
+        const originalCanvas = document.createElement('canvas');
+        const originalCtx = originalCanvas.getContext('2d');
+        const resultCanvas = document.createElement('canvas');
+        const resultCtx = resultCanvas.getContext('2d');
+        
+        // متغيرات التطبيق
+        let uploadedImages = [];
+        let processedImages = [];
+        let removalMode = 'background'; // 'background' أو 'color'
+        let selectedColor = null;
+        let colorTolerance = 20;
+        let currentModalImage = null;
+        
+        // أحداث تحميل الملف
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#fff';
+            uploadArea.style.background = 'rgba(255, 255, 255, 0.2)';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+            uploadArea.style.background = 'transparent';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+            uploadArea.style.background = 'transparent';
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleImageUpload();
+            }
+        });
+        
+        fileInput.addEventListener('change', handleImageUpload);
+        
+        // تحديث قيمة الحساسية والدقة والتسامح
+        sensitivitySlider.addEventListener('input', () => {
+            sensitivityValue.textContent = `${sensitivitySlider.value}%`;
+        });
+        
+        qualitySlider.addEventListener('input', () => {
+            const qualityLevels = {
+                1: 'منخفضة (100%)',
+                2: 'متوسطة (200%)',
+                3: 'عالية (300%)'
+            };
+            qualityValue.textContent = qualityLevels[qualitySlider.value];
+        });
+        
+        toleranceSlider.addEventListener('input', () => {
+            toleranceValue.textContent = `${toleranceSlider.value}%`;
+            colorTolerance = parseInt(toleranceSlider.value);
+        });
+        
+        // أحداث الأزرار
+        removeBgBtn.addEventListener('click', removeBackground);
+        downloadAllBtn.addEventListener('click', downloadAllResults);
+        downloadSelectedBtn.addEventListener('click', downloadSelectedResults);
+        resetBtn.addEventListener('click', resetApp);
+        removeAllBgBtn.addEventListener('click', removeAllBackgrounds);
+        
+        // أحداث أوضاع الإزالة
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                removalMode = btn.dataset.mode;
+                
+                if (removalMode === 'color') {
+                    colorPickerContainer.style.display = 'block';
+                } else {
+                    colorPickerContainer.style.display = 'none';
+                }
+            });
+        });
+        
+        // أحداث اختيار الألوان
+        colorOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                colorOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                selectedColor = option.dataset.color;
+                colorPreview.style.backgroundColor = selectedColor;
+            });
+        });
+        
+        // أحداث النافذة المنبثقة
+        closeModal.addEventListener('click', () => {
+            imageModal.style.display = 'none';
+        });
+        
+        modalDownload.addEventListener('click', () => {
+            if (currentModalImage) {
+                const link = document.createElement('a');
+                link.download = `صورة_بدون_خلفية_${currentModalImage.id + 1}.png`;
+                link.href = currentModalImage.resultDataUrl;
+                link.click();
+            }
+        });
+        
+        // إغلاق النافذة المنبثقة بالنقر خارجها
+        imageModal.addEventListener('click', (e) => {
+            if (e.target === imageModal) {
+                imageModal.style.display = 'none';
+            }
+        });
+        
+        // معالجة تحميل الصور المتعددة
+        function handleImageUpload() {
+            if (!fileInput.files.length) return;
+            
+            const files = Array.from(fileInput.files);
+            
+            // التحقق من عدد الملفات
+            if (files.length > 50) {
+                alert('يمكنك تحميل 50 صورة كحد أقصى في المرة الواحدة');
+                return;
+            }
+            
+            // إعادة تعيين الصور السابقة إذا كانت هذه عملية تحميل جديدة
+            if (uploadedImages.length === 0) {
+                uploadedImages = [];
+                processedImages = [];
+                imagesGrid.innerHTML = '';
+            }
+            
+            let loadedCount = 0;
+            
+            files.forEach((file, index) => {
+                if (!file.type.match('image.*')) {
+                    alert('الرجاء تحميل ملفات صورة فقط');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        // إضافة الصورة إلى المصفوفة
+                        const imageObj = {
+                            id: uploadedImages.length,
+                            file: file,
+                            src: e.target.result,
+                            img: img,
+                            processed: false,
+                            resultDataUrl: null
+                        };
+                        
+                        uploadedImages.push(imageObj);
+                        
+                        // إضافة الصورة إلى الشبكة
+                        addImageToGrid(imageObj);
+                        
+                        loadedCount++;
+                        
+                        // تفعيل الأزرار بعد تحميل الصور
+                        if (loadedCount === files.length) {
+                            removeBgBtn.disabled = false;
+                            removeAllBgBtn.disabled = false;
+                            downloadAllBtn.disabled = false;
+                        }
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // إضافة صورة إلى شبكة العرض
+        function addImageToGrid(imageObj) {
+            const imageItem = document.createElement('div');
+            imageItem.className = 'image-item';
+            imageItem.dataset.id = imageObj.id;
+            
+            const img = document.createElement('img');
+            img.src = imageObj.src;
+            img.alt = `صورة ${imageObj.id + 1}`;
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerHTML = '×';
+            removeBtn.onclick = (e) => {
+                e.stopPropagation();
+                removeImage(imageObj.id);
+            };
+            
+            imageItem.appendChild(img);
+            imageItem.appendChild(removeBtn);
+            
+            imageItem.addEventListener('click', () => {
+                // إزالة التحديد من جميع الصور
+                document.querySelectorAll('.image-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // تحديد الصورة المختارة
+                imageItem.classList.add('active');
+            });
+            
+            imagesGrid.appendChild(imageItem);
+        }
+        
+        // إزالة صورة من القائمة
+        function removeImage(id) {
+            // إزالة الصورة من المصفوفة
+            uploadedImages = uploadedImages.filter(img => img.id !== id);
+            processedImages = processedImages.filter(img => img.id !== id);
+            
+            // إزالة الصورة من الشبكة
+            const imageItem = document.querySelector(`.image-item[data-id="${id}"]`);
+            if (imageItem) {
+                imageItem.remove();
+            }
+            
+            // إزالة الصورة من المعاينة
+            const previewItem = document.querySelector(`.preview-item[data-id="${id}"]`);
+            if (previewItem) {
+                previewItem.remove();
+            }
+            
+            // إعادة تعيين معرفات الصور
+            uploadedImages.forEach((img, index) => {
+                img.id = index;
+                const imageItem = document.querySelector(`.image-item[data-id="${img.id}"]`);
+                if (imageItem) {
+                    imageItem.dataset.id = index;
+                }
+                
+                const previewItem = document.querySelector(`.preview-item[data-id="${img.id}"]`);
+                if (previewItem) {
+                    previewItem.dataset.id = index;
+                }
+            });
+            
+            // تحديث حالة الأزرار
+            if (uploadedImages.length === 0) {
+                removeBgBtn.disabled = true;
+                removeAllBgBtn.disabled = true;
+                downloadAllBtn.disabled = true;
+                downloadSelectedBtn.disabled = true;
+            }
+            
+            // تحديث المعاينة
+            updatePreviewGrid();
+        }
+        
+        // إزالة الخلفية من الصورة المحددة
+        function removeBackground() {
+            const selectedItems = document.querySelectorAll('.image-item.active');
+            if (selectedItems.length === 0) {
+                alert('الرجاء تحديد صورة أولاً');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            removeBgBtn.disabled = true;
+            
+            // استخدام setTimeout لمحاكاة المعالجة غير المتزامنة
+            setTimeout(() => {
+                selectedItems.forEach(item => {
+                    const id = parseInt(item.dataset.id);
+                    processImage(id);
+                });
+                
+                // إخفاء مؤشر التحميل
+                loading.style.display = 'none';
+                removeBgBtn.disabled = false;
+                
+                // تحديث المعاينة
+                updatePreviewGrid();
+            }, 1000);
+        }
+        
+        // إزالة الخلفية من جميع الصور
+        function removeAllBackgrounds() {
+            if (uploadedImages.length === 0) return;
+            
+            loading.style.display = 'block';
+            removeAllBgBtn.disabled = true;
+            removeBgBtn.disabled = true;
+            batchProgressBar.style.width = '0%';
+            batchStatus.textContent = `جاري معالجة 0 من ${uploadedImages.length} صورة`;
+            
+            let processedCount = 0;
+            
+            // معالجة كل صورة واحدة تلو الأخرى
+            const processNextImage = () => {
+                if (processedCount < uploadedImages.length) {
+                    const index = processedCount;
+                    batchStatus.textContent = `جاري معالجة ${processedCount + 1} من ${uploadedImages.length} صورة`;
+                    
+                    processImage(index);
+                    
+                    processedCount++;
+                    const progress = (processedCount / uploadedImages.length) * 100;
+                    batchProgressBar.style.width = `${progress}%`;
+                    
+                    // معالجة الصورة التالية بعد تأخير قصير
+                    setTimeout(processNextImage, 300);
+                } else {
+                    // الانتهاء من المعالجة
+                    loading.style.display = 'none';
+                    removeAllBgBtn.disabled = false;
+                    removeBgBtn.disabled = false;
+                    batchStatus.textContent = `تم معالجة جميع الصور (${uploadedImages.length})`;
+                    
+                    // تحديث المعاينة
+                    updatePreviewGrid();
+                }
+            };
+            
+            processNextImage();
+        }
+        
+        // معالجة صورة محددة
+        function processImage(index) {
+            const imageObj = uploadedImages[index];
+            const img = imageObj.img;
+            
+            // ضبط أبعاد الكانفاس بناءً على جودة المعالجة
+            const quality = parseInt(qualitySlider.value);
+            const scaleFactor = quality;
+            
+            let width = img.width * scaleFactor;
+            let height = img.height * scaleFactor;
+            
+            // تحديد أبعاد قصوى للحفاظ على الأداء
+            const maxDimension = 2000;
+            if (width > maxDimension || height > maxDimension) {
+                const ratio = Math.min(maxDimension / width, maxDimension / height);
+                width *= ratio;
+                height *= ratio;
+            }
+            
+            // إنشاء كانفاس مؤقت للمعالجة
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = width;
+            tempCanvas.height = height;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // رسم الصورة على الكانفاس المؤقت
+            tempCtx.drawImage(img, 0, 0, width, height);
+            
+            // الحصول على بيانات الصورة
+            const imageData = tempCtx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+            
+            if (removalMode === 'background') {
+                // تطبيق خوارزمية إزالة الخلفية المحسنة
+                const sensitivity = sensitivitySlider.value / 100;
+                
+                // خوارزمية محسنة لإزالة الخلفية
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    
+                    // حساب القيم المختلفة للكشف عن الخلفية
+                    const avg = (r + g + b) / 3;
+                    const max = Math.max(r, g, b);
+                    const min = Math.min(r, g, b);
+                    const saturation = max === 0 ? 0 : (max - min) / max;
+                    
+                    // تحسين الكشف عن الخلفية باستخدام معايير متعددة
+                    const isBackground = (
+                        avg > 220 * sensitivity || 
+                        (avg > 180 * sensitivity && saturation < 0.2) ||
+                        (r > 200 * sensitivity && g > 200 * sensitivity && b > 200 * sensitivity)
+                    );
+                    
+                    if (isBackground) {
+                        data[i + 3] = 0; // جعل البكسل شفافاً
+                    }
+                }
+            } else if (removalMode === 'color' && selectedColor) {
+                // إزالة اللون المحدد
+                const targetRgb = hexToRgb(selectedColor);
+                if (targetRgb) {
+                    const tolerance = colorTolerance / 100 * 255;
+                    
+                    for (let i = 0; i < data.length; i += 4) {
+                        const r = data[i];
+                        const g = data[i + 1];
+                        const b = data[i + 2];
+                        
+                        // حساب الفرق بين لون البكسل واللون المحدد
+                        const diff = Math.sqrt(
+                            Math.pow(r - targetRgb.r, 2) +
+                            Math.pow(g - targetRgb.g, 2) +
+                            Math.pow(b - targetRgb.b, 2)
+                        );
+                        
+                        // إذا كان الفرق ضمن نطاق التسامح، نجعل البكسل شفافاً
+                        if (diff <= tolerance) {
+                            data[i + 3] = 0;
+                        }
+                    }
+                }
+            }
+            
+            // وضع البيانات المعالجة على الكانفاس المؤقت
+            tempCtx.putImageData(imageData, 0, 0);
+            
+            // حفظ النتيجة
+            imageObj.resultDataUrl = tempCanvas.toDataURL();
+            imageObj.processed = true;
+            
+            // إضافة إلى الصور المعالجة إذا لم تكن موجودة
+            if (!processedImages.some(pImg => pImg.id === imageObj.id)) {
+                processedImages.push(imageObj);
+            }
+        }
+        
+        // تحويل اللون من HEX إلى RGB
+        function hexToRgb(hex) {
+            // إذا كان اللون بصيغة rgb
+            if (hex.startsWith('rgb')) {
+                const match = hex.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+                if (match) {
+                    return {
+                        r: parseInt(match[1]),
+                        g: parseInt(match[2]),
+                        b: parseInt(match[3])
+                    };
+                }
+            }
+            
+            // إذا كان اللون بصيغة hex
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+        
+        // تحديث شبكة المعاينة
+        function updatePreviewGrid() {
+            // إخفاء النص التوضيحي إذا كانت هناك صور معالجة
+            if (processedImages.length > 0) {
+                previewPlaceholder.style.display = 'none';
+                downloadSelectedBtn.disabled = false;
+            } else {
+                previewPlaceholder.style.display = 'block';
+                downloadSelectedBtn.disabled = true;
+            }
+            
+            // مسح الشبكة الحالية
+            previewGrid.innerHTML = '';
+            if (processedImages.length === 0) {
+                previewGrid.appendChild(previewPlaceholder);
+                return;
+            }
+            
+            // إضافة الصور المعالجة إلى الشبكة
+            processedImages.forEach(imageObj => {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+                previewItem.dataset.id = imageObj.id;
+                
+                const img = document.createElement('img');
+                img.src = imageObj.resultDataUrl;
+                img.alt = `صورة ${imageObj.id + 1} بدون خلفية`;
+                
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'download-btn';
+                downloadBtn.innerHTML = '↓';
+                downloadBtn.title = 'تحميل الصورة';
+                downloadBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    downloadSingleImage(imageObj);
+                };
+                
+                previewItem.appendChild(img);
+                previewItem.appendChild(downloadBtn);
+                
+                previewItem.addEventListener('click', () => {
+                    openImageModal(imageObj);
+                });
+                
+                previewGrid.appendChild(previewItem);
+            });
+        }
+        
+        // فتح الصورة في نافذة منبثقة
+        function openImageModal(imageObj) {
+            currentModalImage = imageObj;
+            modalImage.src = imageObj.resultDataUrl;
+            modalImage.alt = `صورة ${imageObj.id + 1} بدون خلفية`;
+            imageModal.style.display = 'flex';
+        }
+        
+        // تحميل صورة واحدة
+        function downloadSingleImage(imageObj) {
+            const link = document.createElement('a');
+            link.download = `صورة_بدون_خلفية_${imageObj.id + 1}.png`;
+            link.href = imageObj.resultDataUrl;
+            link.click();
+        }
+        
+        // تحميل جميع الصور المعالجة
+        function downloadAllResults() {
+            if (processedImages.length === 0) return;
+            
+            processedImages.forEach((image, index) => {
+                const link = document.createElement('a');
+                link.download = `صورة_بدون_خلفية_${index + 1}.png`;
+                link.href = image.resultDataUrl;
+                link.click();
+            });
+        }
+        
+        // تحميل الصور المحددة فقط
+        function downloadSelectedResults() {
+            if (processedImages.length === 0) return;
+            
+            processedImages.forEach((image, index) => {
+                const link = document.createElement('a');
+                link.download = `صورة_بدون_خلفية_${index + 1}.png`;
+                link.href = image.resultDataUrl;
+                link.click();
+            });
+        }
+        
+        // إعادة تعيين التطبيق
+        function resetApp() {
+            fileInput.value = '';
+            removeBgBtn.disabled = true;
+            downloadAllBtn.disabled = true;
+            downloadSelectedBtn.disabled = true;
+            removeAllBgBtn.disabled = true;
+            sensitivitySlider.value = 50;
+            sensitivityValue.textContent = '50%';
+            qualitySlider.value = 3;
+            qualityValue.textContent = 'عالية (300%)';
+            toleranceSlider.value = 20;
+            toleranceValue.textContent = '20%';
+            uploadedImages = [];
+            processedImages = [];
+            imagesGrid.innerHTML = '';
+            previewGrid.innerHTML = '';
+            previewGrid.appendChild(previewPlaceholder);
+            previewPlaceholder.style.display = 'block';
+            batchProgressBar.style.width = '0%';
+            batchStatus.textContent = '';
+            loading.style.display = 'none';
+            removalMode = 'background';
+            selectedColor = null;
+            colorPreview.style.backgroundColor = '';
+            modeButtons[0].classList.add('active');
+            modeButtons[1].classList.remove('active');
+            colorPickerContainer.style.display = 'none';
+            colorOptions.forEach(opt => opt.classList.remove('active'));
+            imageModal.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
